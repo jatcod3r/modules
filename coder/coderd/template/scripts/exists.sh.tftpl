@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -euo pipefail
+
+if curl -X GET --fail https://$URL/api/v2/organizations/$ORG_ID/templates/$TEMPLATE/versions/$VERSION \
+    -H 'Accept: application/json' \
+    -H 'Coder-Session-Token: $TOKEN' -s > /dev/null; then
+    exit 0
+fi
+exit 1
