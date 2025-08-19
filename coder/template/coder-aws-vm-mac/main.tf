@@ -153,7 +153,7 @@ resource "coder_agent" "ec2-agent" {
         }
     }
 
-    dymamic "resource_monitoring" {
+    dynamic "resource_monitoring" {
         for_each = var.volume_monitoring != {} || var.memory_monitoring != {} ? [1] : []
         content {
             dynamic "memory" {
