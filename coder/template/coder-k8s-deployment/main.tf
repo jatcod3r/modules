@@ -165,7 +165,7 @@ variable "pvc_storage_size" {
 
 data "coder_workspace" "me" {}
 
-resource "coder_agent" "agent" {
+resource "coder_agent" "pod-agent" {
     arch = "amd64"
     os = "linux"
     display_apps {
