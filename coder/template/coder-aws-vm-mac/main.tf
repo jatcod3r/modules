@@ -111,13 +111,14 @@ variable "metadata_blocks" {
     default = []
 }
 
-data "aws_ami" "this" {
-    most_recent      = true
-    filter {
-        name   = "source"
-        values = ["amazon/amzn-ec2-macos-*"]
-    }
-}
+# data "aws_ami" "this" {
+#     most_recent      = true
+#     owners           = ["amazon"]
+#     filter {
+#         name   = "name"
+#         values = ["amzn-ec2-macos-*"]
+#     }
+# }
 
 data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
@@ -127,7 +128,7 @@ locals {
         threshold = var.volume_monitoring.threshold
         path = var.home_mount_path
     } : var.volume_monitoring
-    ami_id = var.ami_id != "" ? var.ami_id : data.aws_ami.this.id
+    ami_id = var.ami_id # != "" ? var.ami_id : data.aws_ami.this.id
 }
 
 resource "coder_agent" "ec2-agent" {
