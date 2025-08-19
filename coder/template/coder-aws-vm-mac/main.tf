@@ -141,19 +141,19 @@ resource "coder_agent" "ec2-agent" {
         ssh_helper      = var.show_builtin_ssh_helper
     }
 
-    dynamic "metadata_block" {
+    dynamic "metadata" {
         for_each = var.metadata_blocks
         content {
-            display_name = metadata_block.value.display_name
-            key = metadata_block.value.key
-            order = metadata_block.value.order
-            script = metadata_blocks.value.script
-            interval = metadata_block.value.interval
-            timeout = metadata_block.value.timeout
+            display_name = metadata.value.display_name
+            key = metadata.value.key
+            order = metadata.value.order
+            script = metadata.value.script
+            interval = metadata.value.interval
+            timeout = metadata.value.timeout
         }
     }
 
-    dynamic "resource_monitoring" {
+    dynamic "resources_monitoring" {
         for_each = var.volume_monitoring != {} || var.memory_monitoring != {} ? [1] : []
         content {
             dynamic "memory" {
@@ -181,7 +181,7 @@ resource "aws_ec2_host" "this" {
     host_recovery     = "on"
 }
 
-resource "aws_instance" "mac" {
+resource "aws_instance" "this" {
     ami                         = local.ami_id
     instance_type               = var.instance_type
     subnet_id                   = var.subnet_id
@@ -218,11 +218,11 @@ resource "aws_ec2_instance_state" "this" {
 }
 
 output "id" {
-    value = aws_instance.mac.id
+    value = aws_instance.this.id
 }
 
 output "arn" {
-    value = aws_instance.mac.arn
+    value = aws_instance.this.arn
 }
 
 output "agent_id" {
