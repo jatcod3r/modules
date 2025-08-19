@@ -120,9 +120,8 @@ data "aws_ami" "this" {
     }
 }
 
-data "aws_subnet" "this" {
-    id = var.subnet_id
-}
+data "coder_workspace" "me" {}
+data "coder_workspace_owner" "me" {}
 
 locals {
     volume_monitoring = try(var.volume_monitoring.path, false) == "" ? {
@@ -178,8 +177,8 @@ resource "coder_agent" "ec2-agent" {
 }
 
 resource "aws_ec2_host" "this" {
-    availability_zone = data.aws_subnet.this.availabilty_zone
-    instance_type     = vc
+    availability_zone = var.az_id
+    instance_type     = var.instance_type
     host_recovery     = "on"
 }
 
