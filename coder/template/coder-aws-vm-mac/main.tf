@@ -141,15 +141,15 @@ resource "coder_agent" "ec2-agent" {
         ssh_helper      = var.show_builtin_ssh_helper
     }
 
-    dynamic "metadata_blocks" {
+    dynamic "metadata_block" {
         for_each = var.metadata_blocks
         content {
-            display_name = metadata_blocks.value.display_name
-            key = metadata_blocks.value.key
-            order = metadata_blocks.value.order
+            display_name = metadata_block.value.display_name
+            key = metadata_block.value.key
+            order = metadata_block.value.order
             script = metadata_blocks.value.script
-            interval = metadata_blocks.value.interval
-            timeout = metadata_blocks.value.timeout
+            interval = metadata_block.value.interval
+            timeout = metadata_block.value.timeout
         }
     }
 
