@@ -270,7 +270,7 @@ resource "kubernetes_deployment" "this" {
                     content {
                         name = "copy-to-mount"
                         image = var.container_image
-                        image_pull_policy = "IfNotPresent"
+                        image_pull_policy = var.container_image_pull_policy
                         command = ["cp", "-an", "${var.home_mount_path}/.", "/opt/data"]
                         security_context {
                             run_as_user = 0
