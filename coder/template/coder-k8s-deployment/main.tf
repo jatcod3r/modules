@@ -188,29 +188,114 @@ variable "pvc_storage_size" {
     default = 10
 }
 
+variable "show_builtin_vscode" {
+    type = bool
+    default = false
+}
+
+variable "show_builtin_vscode_insiders" {
+    type = bool
+    default = false
+}
+
+variable "show_builtin_web_terminal" {
+    type = bool
+    default = true
+}
+
+variable "show_builtin_ssh_helper" {
+    type = bool
+    default = false
+}
+
+variable "memory_monitoring" {
+    type = object({
+        threshold = optional(number, 80)
+    })
+    default = {}
+}
+
+variable "volume_monitoring" {
+    type = object({
+        threshold = optional(number, 80)
+        path = optional(string, "")
+    })
+    default = {}
+}
+
+variable "metadata_blocks" {
+    type = list(object({
+        display_name = string
+        key = string
+        order = optional(number, 1)
+        script = string
+        interval = optional(number, 10)
+        timeout = optional(number, 1)
+    }))
+    default = []
+}
+
 data "coder_workspace" "me" {}
 
 resource "coder_agent" "pod-agent" {
-    arch = "amd64"
-    os = "linux"
+    arch = var.container_architecture
+    os = var.container_os
+
     display_apps {
-        vscode          = false
-        vscode_insiders = false
-        web_terminal    = true
-        ssh_helper      = false
+        vscode          = var.show_builtin_vscode
+        vscode_insiders = var.show_builtin_vscode_insiders
+        web_terminal    = var.show_builtin_web_terminal
+        ssh_helper      = var.show_builtin_ssh_helper
+    }
+
+    dynamic "metadata" {
+        for_each = var.metadata_blocks
+        content {
+            display_name = metadata.value.display_name
+            key = metadata.value.key
+            order = metadata.value.order
+            script = metadata.value.script
+            interval = metadata.value.interval
+            timeout = metadata.value.timeout
+        }
+    }
+
+    dynamic "resources_monitoring" {
+        for_each = var.volume_monitoring != {} || var.memory_monitoring != {} ? [1] : []
+        content {
+            dynamic "memory" {
+                for_each = var.memory_monitoring != {} ? [1] : []
+                content {
+                    enabled = true
+                    threshold = var.memory_monitoring.threshold
+                }
+            }
+            dynamic "volume" {
+                for_each = var.volume_monitoring != {} ? [1] : []
+                content {
+                    enabled = true
+                    threshold = local.volume_monitoring.threshold
+                    path = local.volume_monitoring.path
+                }
+            }
+        }
     }
 }
 
 locals {
     envs = merge({
-        CODER_AGENT_TOKEN = try(coder_agent.agent.token, "")
+        CODER_AGENT_TOKEN = try(coder_agent.pod-agent.token, "")
     }, var.envs)
     envs_secret = merge({}, var.envs_secret)
     command = ["sh", "-c", join("\n", [
         var.pre_command, 
-        try(coder_agent.agent.init_script, ""), 
+        try(coder_agent.pod-agent.init_script, ""), 
         var.post_command
     ])]
+    volume_monitoring = try(var.volume_monitoring.path, false) == "" ? {
+        threshold = var.volume_monitoring.threshold
+        path = var.home_mount_path
+    } : var.volume_monitoring
 }
 
 resource "kubernetes_persistent_volume_claim" "home" {
@@ -376,7 +461,7 @@ resource "kubernetes_deployment" "this" {
 }
 
 output "agent_id" {
-    value = coder_agent.agent.id
+    value = coder_agent.pod-agent.id
 }
 
 output "id" {
