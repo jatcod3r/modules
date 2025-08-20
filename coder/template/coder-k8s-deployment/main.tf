@@ -84,6 +84,31 @@ variable "container_name" {
 variable "container_image_pull_policy" {
     type = string
     default = "Always"
+
+    validation {
+        condition = contains(["IfNotPresent", "Always", "Never"], var.container_image_pull_policy)
+        error_message = "'container_image_pull_policy' must be either 'IfNotPresent', 'Always', or 'Never'"
+    }
+}
+
+variable "container_architecture" {
+    type = string
+    default = "amd64"
+
+    validation {
+        condition = contains(["amd64", "arm64", "armv7"], var.container_architecture)
+        error_message = "'container_architecture' must be either 'amd64', 'arm64', or 'armv7'"
+    }
+}
+
+variable "container_os" {
+    type = string
+    default = "linux"
+
+    validation {
+        condition = contains(["linux", "darwin", "windows"], var.container_os)
+        error_message = "'container_os' must be either 'linux', 'darwin', or 'windows'"
+    }
 }
 
 variable "envs" {
