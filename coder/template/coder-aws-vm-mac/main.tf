@@ -46,20 +46,10 @@ variable "volume_monitoring" {
 
 variable "home_mount_path" {
     type = string
-    default = "/home/coder"
-}
-
-variable "instance_type" {
-    type = string
-    default = "mac1.metal"
+    default = "/Users/ec2-user"
 }
 
 variable "subnet_id" {
-    type = string
-    default = ""
-}
-
-variable "az_id" {
     type = string
     default = ""
 }
@@ -76,7 +66,7 @@ variable "associate_public_ip_address" {
 
 variable "ami_id" {
     type = string
-    default = null
+    default = ""
 }
 
 variable "pre_command" {
@@ -94,9 +84,39 @@ variable "volume_size" {
     default = 20
 }
 
+variable "coder_envs" {
+    type = map(string)
+    default = {}
+}
+
 variable "tags" {
     type = map(string)
     default = {}
+}
+
+variable "instance_profile_name" {
+    type = string
+    default = null
+}
+
+variable "az_id" {
+    type = string
+    default = "a"
+
+    validation {
+        condition = contains(["a", "b", "c", "d", "e"], var.az_id)
+        error_message = "'az_id' invalid. Must be either 'a', 'b', 'c', 'd'."
+    }   
+}
+
+variable "ec2_host_id" {
+    type = string
+    default = ""
+}
+
+variable "ec2_user_password" {
+    type = string
+    sensitive = true
 }
 
 variable "metadata_blocks" {
@@ -111,15 +131,24 @@ variable "metadata_blocks" {
     default = []
 }
 
-# data "aws_ami" "this" {
-#     most_recent      = true
-#     owners           = ["amazon"]
-#     filter {
-#         name   = "name"
-#         values = ["amzn-ec2-macos-*"]
-#     }
-# }
+data "aws_ec2_instance_type" "this" {
+    instance_type = data.aws_ec2_host.this.instance_type
+}
 
+data "aws_ami" "this" {
+    most_recent      = true
+    owners           = ["amazon"]
+    filter {
+        name   = "name"
+        values = ["amzn-ec2-macos-*"]
+    }
+    filter {
+        name   = "architecture"
+        values = data.aws_ec2_instance_type.this.supported_architectures
+    }
+}
+
+data "aws_region" "current" {}
 data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
 
@@ -128,20 +157,24 @@ locals {
         threshold = var.volume_monitoring.threshold
         path = var.home_mount_path
     } : var.volume_monitoring
-    ami_id = var.ami_id # != "" ? var.ami_id : data.aws_ami.this.id
+    ami_id = var.ami_id != "" ? var.ami_id : data.aws_ami.this.id
+    availability_zone = "${data.aws_region.current.region}${var.az_id}"
+    coder_envs = merge({
+        USER_PASSWORD = var.ec2_user_password
+    }, var.coder_envs)
 }
 
 resource "coder_agent" "ec2-agent" {
-    arch = "amd64"
+    arch = trimsuffix(data.aws_ec2_instance_type.this.supported_architectures[0], "_mac")
     os = "darwin"
-
+    auth = "aws-instance-identity"
+    env = var.coder_envs
     display_apps {
         vscode          = var.show_builtin_vscode
         vscode_insiders = var.show_builtin_vscode_insiders
         web_terminal    = var.show_builtin_web_terminal
         ssh_helper      = var.show_builtin_ssh_helper
     }
-
     dynamic "metadata" {
         for_each = var.metadata_blocks
         content {
@@ -153,7 +186,6 @@ resource "coder_agent" "ec2-agent" {
             timeout = metadata.value.timeout
         }
     }
-
     dynamic "resources_monitoring" {
         for_each = var.volume_monitoring != {} || var.memory_monitoring != {} ? [1] : []
         content {
@@ -176,26 +208,43 @@ resource "coder_agent" "ec2-agent" {
     }
 }
 
-resource "aws_ec2_host" "this" {
-    availability_zone = var.az_id
-    instance_type     = var.instance_type
-    host_recovery     = "on"
+resource "coder_script" "open_mac" {
+    agent_id     = coder_agent.ec2-agent.id
+    display_name = "Open Mac"
+    icon         = "/icon/apple-black.svg"
+    run_on_start = true
+    start_blocks_login = true
+    script = <<-EOF
+        #!/usr/bin/env sh
+        dscl . -passwd /Users/ec2-user "$USER_PASSWORD"
+        sudo -u 'ec2-user' sh -c '
+        sudo launchctl enable system/com.apple.screensharing
+        sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.screensharing.plist
+        '
+    EOF
+}
+
+data "aws_ec2_host" "this" {
+    host_id = var.ec2_host_id
 }
 
 resource "aws_instance" "this" {
     ami                         = local.ami_id
-    instance_type               = var.instance_type
+    instance_type               = data.aws_ec2_host.this.instance_type
     subnet_id                   = var.subnet_id
+    availability_zone           = var.subnet_id != "" ? null : data.aws_ec2_host.this.availability_zone
+    host_id                     = data.aws_ec2_host.this.host_id
     associate_public_ip_address = var.associate_public_ip_address
     vpc_security_group_ids      = var.vpc_security_group_ids
-    host_id                     = aws_ec2_host.this.id
+    iam_instance_profile        = var.instance_profile_name
+    tenancy = "host"
 
-    user_data = join("\n", [
-        var.pre_command,
-        coder_agent.ec2-agent.init_script,
-        var.post_command
-    ])
-        
+    user_data = join("\n", concat(
+        var.pre_command == "" ? [] : [ var.pre_command ], 
+        [ coder_agent.ec2-agent.init_script ], 
+        var.post_command == "" ? [] : [ var.post_command ]
+    ))
+
     root_block_device {
         volume_size = var.volume_size
         volume_type = "gp3"
@@ -210,7 +259,16 @@ resource "aws_instance" "this" {
         ignore_changes = [ ami ]
     }
 
+    timeouts {
+        create = "90m"
+    }
+
     tags = var.tags
+}
+
+resource "coder_agent_instance" "this" {
+    agent_id    = coder_agent.ec2-agent.id
+    instance_id = aws_instance.this.id
 }
 
 resource "aws_ec2_instance_state" "this" {
