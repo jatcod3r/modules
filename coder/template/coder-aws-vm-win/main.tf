@@ -159,7 +159,7 @@ data "aws_ami" "this" {
 
 resource "coder_agent" "ec2-agent" {
     arch = "amd64"
-    os = "linux"
+    os = "windows"
     auth = "aws-instance-identity"
     env = var.coder_envs
     display_apps {
