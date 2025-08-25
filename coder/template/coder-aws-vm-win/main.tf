@@ -148,7 +148,7 @@ data "aws_ami" "this" {
         values = ["Windows_Server-*-English-Full-Base-*"]
     }
     filter {
-        name = "virtualiziation-type"
+        name = "virtualization-type"
         values = ["hvm"]
     }
     filter {
