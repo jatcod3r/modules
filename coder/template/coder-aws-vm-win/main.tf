@@ -260,3 +260,7 @@ output "arn" {
 output "agent_id" {
     value = coder_agent.ec2-agent.id
 }
+
+output "agent_name" {
+    value = "ec2-agent"
+}
