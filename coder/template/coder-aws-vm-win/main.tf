@@ -81,7 +81,7 @@ variable "post_command" {
 
 variable "volume_size" {
     type = number
-    default = 20
+    default = 30
 }
 
 variable "coder_envs" {
