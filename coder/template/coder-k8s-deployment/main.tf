@@ -156,6 +156,11 @@ variable "deployment_strategy" {
     default = "Recreate"
 }
 
+variable "add_dind_sidecar" {
+    type = bool
+    default = false
+}
+
 variable "pre_command" {
     type = string
     description = "Command(s) to run before the Coder initialization script."
@@ -285,7 +290,7 @@ resource "coder_agent" "pod-agent" {
 locals {
     envs = merge({
         CODER_AGENT_TOKEN = try(coder_agent.pod-agent.token, "")
-    }, var.envs)
+    }, var.add_dind_sidecar ? { DOCKER_HOST = "localhost:2375" } : {}, var.envs)
     envs_secret = merge({}, var.envs_secret)
     command = ["sh", "-c", join("\n", [
         var.pre_command, 
@@ -400,6 +405,33 @@ resource "kubernetes_deployment" "this" {
                         }
                     }
                 }
+
+                dynamic "container" {
+                    for_each = var.add_dind_sidecar ? [1] : []
+                    content {
+                        name = "docker"
+                        image = "docker:dind"
+                        image_pull_policy = "IfNotPresent"
+                        command = ["dockerd", "-H", "tcp://127.0.0.1:2375"]
+                        security_context {
+                            run_as_user = 0
+                            allow_privilege_escalation = true
+                            privileged = true
+                        }
+                        env {
+                            name = "DOCKER_HOST"
+                            value = "localhost:2375"
+                        }
+                        resources {
+                            limits = {
+                                cpu    = "1000m"
+                                memory = "2Gi"
+                                ephemeral-storage = "10Gi"
+                            }
+                        }
+                    }
+                }
+
                 container {
                     name              = var.container_name
                     image             = var.container_image
@@ -462,6 +494,10 @@ resource "kubernetes_deployment" "this" {
 
 output "agent_id" {
     value = coder_agent.pod-agent.id
+}
+
+output "agent_name" {
+    value = "pod-agent" # This is not referrable, statically set based on the coder_agent's resource name.
 }
 
 output "id" {
