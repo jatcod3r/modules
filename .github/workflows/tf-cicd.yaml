@@ -6,18 +6,23 @@ on:
       working-directory:
         required: true
         type: string
-    secrets:
-      personal_access_token:
-        required: true
-      aws_access_key_id:
-        required: true
-      aws_secret_key_id:
-        required: true
+    # secrets:
+    #   personal_access_token:
+    #     required: true
+    #   aws_access_key_id:
+    #     required: true
+    #   aws_secret_key_id:
+    #     required: true
+
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ${{ inputs.working-directory }}
 
 jobs:
   tf-plan:
     runs-on: ubuntu-latest
-
     permissions:
       id-token: write
       contents: read
@@ -41,16 +46,13 @@ jobs:
     #     AWS_SECRET_KEY_ID: ""
     
     - name: tf-init
-      working-directory: ${{ inputs.working-directory }}
       run: terraform init
 
     - name: tf-plan
-      working-directory: ${{ inputs.working-directory }}
       run: terraform plan -out=plan.tfout
     
     - name: store-plan
       uses: actions/upload-artifact@v3
-      working-directory: ${{ inputs.working-directory }}
       with:
         name: tf-plan
         path: ./plan.tfout
