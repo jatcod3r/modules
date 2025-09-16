@@ -8,8 +8,6 @@ on:
 jobs:
   coder-aws-vm-linux:
     uses: jatcod3r/modules/.github/workflows/tf-cicd.yaml
-    defaults:
-      run:
-        shell: bash
-        working-directory: jatcod3r/modules/coder/template/coder-aws-vm-linux
+    with:
+      working-directory: jatcod3r/modules/coder/template/coder-aws-vm-linux
 
