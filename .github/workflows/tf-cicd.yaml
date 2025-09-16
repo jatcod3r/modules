@@ -2,23 +2,17 @@ name: TF CI/CD
 
 on:
   workflow_call:
-    inputs:
-      working-directory:
-        required: true
-        type: string
-    # secrets:
-    #   personal_access_token:
-    #     required: true
-    #   aws_access_key_id:
-    #     required: true
-    #   aws_secret_key_id:
-    #     required: true
-
-
-defaults:
-  run:
-    shell: bash
-    working-directory: ${{ inputs.working-directory }}
+    inputs: {}
+      # working-directory:
+      #   required: true
+      #   type: string
+    secrets: {}
+      # personal_access_token:
+      #   required: true
+      # aws_access_key_id:
+      #   required: true
+      # aws_secret_key_id:
+      #   required: true
 
 jobs:
   tf-plan:
