@@ -1,0 +1,89 @@
+name: TF CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
+    secrets:
+      personal_access_token:
+        required: true
+      aws_access_key_id:
+        required: true
+      aws_secret_key_id:
+        required: true
+
+jobs:
+  tf-plan:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    # - name: inject
+    #   uses: rlespinasse/github-slug-action@v3.x
+
+    - name: tf-setup
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.13.0
+
+    # - name: aws-config
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #     AWS_ACCESS_KEY_ID: ""
+    #     AWS_SECRET_KEY_ID: ""
+    
+    - name: tf-init
+      working-directory: ${{ inputs.working-directory }}
+      run: terraform init
+
+    - name: tf-plan
+      working-directory: ${{ inputs.working-directory }}
+      run: terraform plan -out=plan.tfout
+    
+    - name: store-plan
+      uses: actions/upload-artifact@v3
+      working-directory: ${{ inputs.working-directory }}
+      with:
+        name: tf-plan
+        path: ./plan.tfout
+      
+    # - name: move-lock
+    #   working-directory: ${{ inputs.working-directory }}
+    #   run: cp ./.terraform.lock.hcl /home/runner/work/{REPO_NAME}/{REPO_NAME}/.terraform.lock.hcl
+
+    # - name: store-lock
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: tf-lock
+    #     path:  /home/runner/work/{REPO_NAME}/{REPO_NAME}/.terraform.lock.hcl
+    #     include-hidden-files: true
+
+  # manual-approval:
+  #   name: manual-approval
+  #   runs-on: ubuntu-latest
+  #   needs: tf-plan
+  #   if: success()
+
+  #   permissions:
+  #     issues: write
+  #     contents: read
+    
+  #   steps:
+  #   - name: wait-for-approval
+  #     uses: trstringer/manual-approval@v1
+  #     with:
+  #       secret: ${{ github.Token }}
+  #       approvers: jatcod3r
+  #       minimum-approvals: 1
+  #       issue-title: "Manual Approval Required for `tf apply`."
+  #       issue-body: "Please approve/deny the deployment."
+  #       exclude-workflow-inititator-as-approver: false
+

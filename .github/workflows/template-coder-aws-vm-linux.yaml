@@ -1,0 +1,10 @@
+name: Call a Re-Useable Workflow
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  coder-aws-vm-linux:
+    uses: jatcod3r/modules/.github/workflows/tf-cicd.yaml
