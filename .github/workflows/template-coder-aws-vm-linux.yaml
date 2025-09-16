@@ -10,6 +10,7 @@ jobs:
     uses: ./.github/workflows/tf-cicd.yaml
     permissions:
       id-token: write
+      issues: write
       contents: read
     with:
       working-directory: ./coder/template/coder-aws-vm-linux
