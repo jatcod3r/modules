@@ -8,6 +8,9 @@ on: push
 jobs:
   coder-aws-vm-linux:
     uses: ./.github/workflows/tf-cicd.yaml
+    permissions:
+      id-token: write
+      contents: read
     with:
-      working-directory: ./coder/template/coder-aws-vm-linux.yaml
+      working-directory: ./coder/template/coder-aws-vm-linux
 
