@@ -1,13 +1,13 @@
 name: Call a Re-Useable Workflow
 
-on:
-  pull_request:
-    branches:
-      - master
+on: push
+  # pull_request:
+  #   branches:
+  #     - master
 
 jobs:
   coder-aws-vm-linux:
-    uses: jatcod3r/modules/.github/workflows/tf-cicd.yaml
+    uses: ./.github/workflows/tf-cicd.yaml
     with:
-      working-directory: jatcod3r/modules/coder/template/coder-aws-vm-linux
+      working-directory: ./coder/template/coder-aws-vm-linux.yaml
 
