@@ -6,7 +6,26 @@ on:
       working-directory:
         required: true
         type: string
-    secrets: {}
+      default-audience:
+        type: string
+        default: sts.amazonaws.com
+        required: false
+      s3-profile-name:
+        type: string
+        required: true
+      s3-profile-web-token-path:
+        type: string
+        default: /tmp/web_identity_token_file
+        required: false
+    secrets: 
+      default-role:
+        required: true
+      default-region:
+        required: true
+      s3-role:
+        required: true
+      s3-region:
+        required: true
 
 jobs: 
   tf-plan:
@@ -22,6 +41,20 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v3
+
+    - name: setup-default-profile
+      uses: aws-actions/configure-aws-credentials@v5.0.0
+      with:
+        audience: ${{ inputs.default-audience }}
+        aws-region: ${{ secrets.default-region }}
+        role-to-assume: ${{ secrets.default-role }}
+
+    - name: setup-s3-profile
+      run: |
+          aws configure set region ${{ secrets.s3-region }} --profile ${{ inputs.s3-profile-name }}
+          aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ inputs.s3-profile-name }}
+          curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ${{ inputs.s3-profile-web-token-path }}
+          aws configure set web_identity_token_file "${{ inputs.s3-profile-web-token-path }}" --profile ${{ inputs.s3-profile-name }}
 
     # - name: inject
     #   uses: rlespinasse/github-slug-action@v3.x
