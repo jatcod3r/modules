@@ -12,11 +12,11 @@ jobs:
       id-token: write
       contents: read
     secrets:
-      default-role: ${{ secrets.default-role }}
-      default-region: ${{ secrets.default-region }}
+      default-role: ${{ secrets.DEFAULT_ROLE }}
+      default-region: ${{ secrets.DEFAULT_REGION }}
       s3-profile-name: demo-profile
-      s3-role: ${{ secrets.s3-role }}
-      s3-region: ${{ secrets.s3-region }}
+      s3-role: ${{ secrets.S3_ROLE }}
+      s3-region: ${{ secrets.S3_REGION }}
   
   coder-aws-vm-linux:
     uses: ./.github/workflows/tf-cicd.yaml
