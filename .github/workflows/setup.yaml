@@ -2,7 +2,8 @@ name: Init Environment
 
 on:
   workflow_call:
-    inputs:
+    inputs: {}
+    secrets: 
       default-role:
         type: string
         required: true
@@ -18,7 +19,6 @@ on:
       s3-region:
         type: string
         required: true
-    secrets: {}
 
 jobs:
   aws-login:
@@ -29,18 +29,17 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ${{ inputs.working-directory }}
     steps:
       - name: setup-default
         uses: aws-actions/configure-aws-credentials@v5.0.0
         with:
           audience: sts.amazonaws.com
-          aws-region: ${{ inputs.default-region }}
-          role-to-assume: ${{ inputs.default-role }}
+          aws-region: ${{ secrets.default-region }}
+          role-to-assume: ${{ secrets.default-role }}
 
       - name: setup-profile
         run: |
             curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ~/.aws/web_identity_token_file
-            aws configure set region ${{ inputs.s3-region }} --profile ${{ inputs.s3-profile-name }}
-            aws configure set role_arn ${{ inputs.s3-role }} --profile ${{ inputs.s3-profile-name }}
-            aws configure set web_identity_token_file "~/.aws/web_identity_token_file" --profile ${{ inputs.s3-profile-name }}
+            aws configure set region ${{ secrets.s3-region }} --profile ${{ secrets.s3-profile-name }}
+            aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ secrets.s3-profile-name }}
+            aws configure set web_identity_token_file "~/.aws/web_identity_token_file" --profile ${{ secrets.s3-profile-name }}

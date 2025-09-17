@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/setup.yaml
     permissions: 
       id-token: write
-    with:
+    secrets:
       default-role: ${{ secrets.default-role }}
       default-region: ${{ secrets.default-region }}
       s3-profile-name: demo-profile
