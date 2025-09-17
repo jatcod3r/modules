@@ -5,19 +5,14 @@ on:
     inputs: {}
     secrets: 
       default-role:
-        type: string
         required: true
       default-region:
-        type: string
         required: true
       s3-profile-name:
-        type: string
         required: true
       s3-role:
-        type: string
         required: true
       s3-region:
-        type: string
         required: true
 
 jobs:
