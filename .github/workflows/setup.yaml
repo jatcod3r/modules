@@ -42,5 +42,5 @@ jobs:
 
       - name: verify
         run: |
-            aws sts get-caller-identity --profile demo-profile
+            aws sts get-caller-identity --profile ${{ inputs.s3-profile-name }}
             ls -la ~
