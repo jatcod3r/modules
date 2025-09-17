@@ -6,18 +6,18 @@ on: push
   #     - master
 
 jobs:
-  login:
-    uses: ./.github/workflows/setup.yaml
-    permissions: 
-      id-token: write
-      contents: read
-    with:
-      s3-profile-name: demo-profile
-    secrets:
-      default-role: ${{ secrets.DEFAULT_ROLE }}
-      default-region: ${{ secrets.DEFAULT_REGION }}
-      s3-role: ${{ secrets.S3_ROLE }}
-      s3-region: ${{ secrets.S3_REGION }}
+  # login:
+  #   uses: ./.github/workflows/setup.yaml
+  #   permissions: 
+  #     id-token: write
+  #     contents: read
+  #   with:
+  #     s3-profile-name: demo-profile
+  #   secrets:
+  #     default-role: ${{ secrets.DEFAULT_ROLE }}
+  #     default-region: ${{ secrets.DEFAULT_REGION }}
+  #     s3-role: ${{ secrets.S3_ROLE }}
+  #     s3-region: ${{ secrets.S3_REGION }}
   
   coder-aws-vm-linux:
     uses: ./.github/workflows/tf-cicd.yaml
