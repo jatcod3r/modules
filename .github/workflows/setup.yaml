@@ -38,8 +38,8 @@ jobs:
             aws configure set region ${{ secrets.s3-region }} --profile ${{ inputs.s3-profile-name }}
             aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ inputs.s3-profile-name }}
             curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com"
-            curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ~/.aws/web_identity_token_file
-            aws configure set web_identity_token_file "~/.aws/web_identity_token_file" --profile ${{ inputs.s3-profile-name }}
+            curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/web_identity_token_file
+            aws configure set web_identity_token_file "/tmp/web_identity_token_file" --profile ${{ inputs.s3-profile-name }}
 
       - name: verify
         run: |
