@@ -28,4 +28,10 @@ jobs:
       contents: read
     with:
       working-directory: ./coder/template/coder-aws-vm-linux
+      s3-profile-name: demo-profile
+    secrets:
+      default-role: ${{ secrets.DEFAULT_ROLE }}
+      default-region: ${{ secrets.DEFAULT_REGION }}
+      s3-role: ${{ secrets.S3_ROLE }}
+      s3-region: ${{ secrets.S3_REGION }}
 
