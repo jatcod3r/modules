@@ -11,10 +11,11 @@ jobs:
     permissions: 
       id-token: write
       contents: read
+    with:
+      s3-profile-name: demo-profile
     secrets:
       default-role: ${{ secrets.DEFAULT_ROLE }}
       default-region: ${{ secrets.DEFAULT_REGION }}
-      s3-profile-name: demo-profile
       s3-role: ${{ secrets.S3_ROLE }}
       s3-region: ${{ secrets.S3_REGION }}
   

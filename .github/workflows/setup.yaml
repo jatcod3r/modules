@@ -2,13 +2,14 @@ name: Init Environment
 
 on:
   workflow_call:
-    inputs: {}
+    inputs: 
+      s3-profile-name:
+        type: string
+        required: true
     secrets: 
       default-role:
         required: true
       default-region:
-        required: true
-      s3-profile-name:
         required: true
       s3-role:
         required: true
@@ -32,14 +33,14 @@ jobs:
           aws-region: ${{ secrets.default-region }}
           role-to-assume: ${{ secrets.default-role }}
 
-      - name: verify
-        run: |
-            aws sts get-caller-identity
-            ls -la ~
-
       - name: setup-profile
         run: |
-            aws configure set region ${{ secrets.s3-region }} --profile ${{ secrets.s3-profile-name }}
-            aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ secrets.s3-profile-name }}
+            aws configure set region ${{ secrets.s3-region }} --profile ${{ inputs.s3-profile-name }}
+            aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ inputs.s3-profile-name }}
             curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ~/.aws/web_identity_token_file
-            aws configure set web_identity_token_file "~/.aws/web_identity_token_file" --profile ${{ secrets.s3-profile-name }}
+            aws configure set web_identity_token_file "~/.aws/web_identity_token_file" --profile ${{ inputs.s3-profile-name }}
+
+      - name: verify
+        run: |
+            aws sts get-caller-identity --profile demo-profile
+            ls -la ~
