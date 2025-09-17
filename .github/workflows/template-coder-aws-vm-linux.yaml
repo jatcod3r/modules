@@ -10,6 +10,7 @@ jobs:
     uses: ./.github/workflows/setup.yaml
     permissions: 
       id-token: write
+      contents: read
     secrets:
       default-role: ${{ secrets.default-role }}
       default-region: ${{ secrets.default-region }}
