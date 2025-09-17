@@ -32,6 +32,11 @@ jobs:
           aws-region: ${{ secrets.default-region }}
           role-to-assume: ${{ secrets.default-role }}
 
+      - name: verify
+        run: |
+            aws sts get-caller-identity
+            ls -la ~
+
       - name: setup-profile
         run: |
             curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ~/.aws/web_identity_token_file
