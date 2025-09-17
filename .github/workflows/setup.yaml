@@ -3,9 +3,17 @@ name: Init Environment
 on:
   workflow_call:
     inputs: 
+      default-audience:
+        type: string
+        default: sts.amazonaws.com
+        required: false
       s3-profile-name:
         type: string
         required: true
+      s3-profile-web-token-path:
+        type: string
+        default: /tmp/web_identity_token_file
+        required: false
     secrets: 
       default-role:
         required: true
@@ -29,7 +37,7 @@ jobs:
       - name: setup-default
         uses: aws-actions/configure-aws-credentials@v5.0.0
         with:
-          audience: sts.amazonaws.com
+          audience: ${{ inputs.default-audience }}
           aws-region: ${{ secrets.default-region }}
           role-to-assume: ${{ secrets.default-role }}
 
@@ -38,10 +46,5 @@ jobs:
             aws configure set region ${{ secrets.s3-region }} --profile ${{ inputs.s3-profile-name }}
             aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ inputs.s3-profile-name }}
             curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com"
-            curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > /tmp/web_identity_token_file
-            aws configure set web_identity_token_file "/tmp/web_identity_token_file" --profile ${{ inputs.s3-profile-name }}
-
-      - name: verify
-        run: |
-            aws sts get-caller-identity --profile ${{ inputs.s3-profile-name }}
-            ls -la ~
+            curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ${{ inputs.s3-profile-web-token-path }}
+            aws configure set web_identity_token_file "${{ inputs.s3-profile-web-token-path }}" --profile ${{ inputs.s3-profile-name }}
