@@ -34,17 +34,16 @@ jobs:
       run:
         shell: bash
     steps:
-      - name: setup-default
+      - name: setup-default-profile
         uses: aws-actions/configure-aws-credentials@v5.0.0
         with:
           audience: ${{ inputs.default-audience }}
           aws-region: ${{ secrets.default-region }}
           role-to-assume: ${{ secrets.default-role }}
 
-      - name: setup-profile
+      - name: setup-s3-profile
         run: |
             aws configure set region ${{ secrets.s3-region }} --profile ${{ inputs.s3-profile-name }}
             aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ inputs.s3-profile-name }}
-            curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com"
             curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ${{ inputs.s3-profile-web-token-path }}
             aws configure set web_identity_token_file "${{ inputs.s3-profile-web-token-path }}" --profile ${{ inputs.s3-profile-name }}

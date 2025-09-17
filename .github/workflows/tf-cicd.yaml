@@ -25,6 +25,8 @@ jobs:
 
     # - name: inject
     #   uses: rlespinasse/github-slug-action@v3.x
+    - name: verify
+      run: aws sts get-caller-identity
 
     - name: tf-setup
       uses: hashicorp/setup-terraform@v3
