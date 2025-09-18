@@ -9,6 +9,10 @@ mock_provider "aws" {
     }
 }
 
+variables {
+    ec2_user_password = "MockP@ssw0rd1234!"
+}
+
 run "create" {
     command = apply
 }
