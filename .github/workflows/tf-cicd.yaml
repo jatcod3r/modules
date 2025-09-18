@@ -36,8 +36,7 @@ on:
       S3_REGION:
         required: false
 
-env:
-  env_var: ${{ inputs.ENV_VARS }}
+env: ${{ toJSON(inputs.ENV_VARS) }}
 
 jobs: 
   tf-validate:

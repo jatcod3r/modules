@@ -24,7 +24,7 @@ jobs:
     with:
       working-directory: ./coder/template/coder-aws-vm-mac
       ENV_VARS: |
-        TF_VAR_ec2_user_password=MockP@ssw0rd1234!
+        TF_VAR_ec2_user_password: MockP@ssw0rd1234!
     secrets: inherit
   template-coder-aws-vm-win:
     uses: ./.github/workflows/tf-cicd.yaml
