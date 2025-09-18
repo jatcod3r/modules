@@ -22,6 +22,10 @@ on:
         type: string
         default: /tmp/web_identity_token_file
         required: false
+      ENV_VARS:
+        type: string
+        required: false
+        default: ""
     secrets: 
       DEFAULT_ROLE:
         required: false
@@ -31,6 +35,9 @@ on:
         required: false
       S3_REGION:
         required: false
+
+env:
+  env_var: ${{ inputs.ENV_VARS }}
 
 jobs: 
   tf-validate:
