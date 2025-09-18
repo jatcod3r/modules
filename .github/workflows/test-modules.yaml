@@ -14,6 +14,7 @@ jobs:
       contents: read
     with:
       working-directory: ./coder/template/coder-aws-vm-linux
+    secrets: inherit
   template-coder-aws-vm-mac:
     uses: ./.github/workflows/tf-cicd.yaml
     permissions:
@@ -22,6 +23,7 @@ jobs:
       contents: read
     with:
       working-directory: ./coder/template/coder-aws-vm-mac
+    secrets: inherit
   template-coder-aws-vm-win:
     uses: ./.github/workflows/tf-cicd.yaml
     permissions:
@@ -30,3 +32,4 @@ jobs:
       contents: read
     with:
       working-directory: ./coder/template/coder-aws-vm-win
+    secrets: inherit

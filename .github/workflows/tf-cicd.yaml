@@ -23,18 +23,14 @@ on:
         default: /tmp/web_identity_token_file
         required: false
     secrets: 
-      default-role:
+      DEFAULT_ROLE:
         required: false
-        default: ${{ secrets.DEFAULT_ROLE }}
-      default-region:
+      DEFAULT_REGION:
         required: false
-        default: ${{ secrets.DEFAULT_REGION }}
-      s3-role:
+      S3_ROLE:
         required: false
-        default: ${{ secrets.S3_ROLE }}
-      s3-region:
+      S3_REGION:
         required: false
-        default: ${{ secrets.S3_REGION }}
 
 jobs: 
   tf-validate:
@@ -55,13 +51,13 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v5.0.0
       with:
         audience: ${{ inputs.default-audience }}
-        aws-region: ${{ secrets.default-region }}
-        role-to-assume: ${{ secrets.default-role }}
+        aws-region: ${{ secrets.DEFAULT_REGION }}
+        role-to-assume: ${{ secrets.DEFAULT_ROLE }}
 
     - name: setup-s3-profile
       run: |
-          aws configure set region ${{ secrets.s3-region }} --profile ${{ inputs.s3-profile-name }}
-          aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ inputs.s3-profile-name }}
+          aws configure set region ${{ secrets.S3_REGION }} --profile ${{ inputs.s3-profile-name }}
+          aws configure set role_arn ${{ secrets.S3_ROLE }} --profile ${{ inputs.s3-profile-name }}
           curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ${{ inputs.s3-profile-web-token-path }}
           aws configure set web_identity_token_file "${{ inputs.s3-profile-web-token-path }}" --profile ${{ inputs.s3-profile-name }}
 
