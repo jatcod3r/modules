@@ -176,7 +176,7 @@ data "aws_ami" "this" {
         values = [local.ami_name[var.distro]]
     }
     filter {
-        name = "virtualiziation-type"
+        name = "virtualization-type"
         values = ["hvm"]
     }
     filter {
