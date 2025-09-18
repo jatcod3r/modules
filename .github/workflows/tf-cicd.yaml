@@ -3,6 +3,10 @@ name: TF CI/CD
 on:
   workflow_call:
     inputs:
+      approvers:
+        required: false
+        type: string
+        default: ${{ vars.APPROVERS }}
       working-directory:
         required: true
         type: string
@@ -12,23 +16,28 @@ on:
         required: false
       s3-profile-name:
         type: string
-        required: true
+        required: false
+        default: demo-profile
       s3-profile-web-token-path:
         type: string
         default: /tmp/web_identity_token_file
         required: false
     secrets: 
       default-role:
-        required: true
+        required: false
+        default: ${{ secrets.DEFAULT_ROLE }}
       default-region:
-        required: true
+        required: false
+        default: ${{ secrets.DEFAULT_REGION }}
       s3-role:
-        required: true
+        required: false
+        default: ${{ secrets.S3_ROLE }}
       s3-region:
-        required: true
+        required: false
+        default: ${{ secrets.S3_REGION }}
 
 jobs: 
-  tf-plan:
+  tf-validate:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -42,7 +51,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@v3
 
-    - name: setup-default-profile
+    - name: setup-default
       uses: aws-actions/configure-aws-credentials@v5.0.0
       with:
         audience: ${{ inputs.default-audience }}
@@ -55,11 +64,6 @@ jobs:
           aws configure set role_arn ${{ secrets.s3-role }} --profile ${{ inputs.s3-profile-name }}
           curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ${{ inputs.s3-profile-web-token-path }}
           aws configure set web_identity_token_file "${{ inputs.s3-profile-web-token-path }}" --profile ${{ inputs.s3-profile-name }}
-
-    # - name: inject
-    #   uses: rlespinasse/github-slug-action@v3.x
-    - name: verify
-      run: aws sts get-caller-identity
 
     - name: tf-setup
       uses: hashicorp/setup-terraform@v3
@@ -77,22 +81,14 @@ jobs:
       with:
         name: tf-plan
         path: ./plan.tfout
-      
-    # - name: move-lock
-    #   working-directory: ${{ inputs.working-directory }}
-    #   run: cp ./.terraform.lock.hcl /home/runner/work/{REPO_NAME}/{REPO_NAME}/.terraform.lock.hcl
 
-    # - name: store-lock
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: tf-lock
-    #     path:  /home/runner/work/{REPO_NAME}/{REPO_NAME}/.terraform.lock.hcl
-    #     include-hidden-files: true
+    - name: tf-test
+      run: terraform test
 
   manual-approval:
     name: manual-approval
     runs-on: ubuntu-latest
-    needs: tf-plan
+    needs: tf-validate
     if: success()
 
     permissions:
@@ -104,7 +100,7 @@ jobs:
       uses: trstringer/manual-approval@v1
       with:
         secret: ${{ github.Token }}
-        approvers: jatcod3r
+        approvers: ${{ inputs.approvers }}
         minimum-approvals: 1
         issue-title: "Manual Approval Required for `tf apply`."
         issue-body: "Please approve/deny the deployment."
