@@ -76,14 +76,14 @@ jobs:
     - name: tf-init
       run: terraform init
 
-    - name: tf-plan
-      run: terraform plan -out=plan.tfout
+    # - name: tf-plan
+    #   run: terraform plan -out=plan.tfout
     
-    - name: store-plan
-      uses: actions/upload-artifact@v4
-      with:
-        name: tf-plan
-        path: ./plan.tfout
+    # - name: store-plan
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: tf-plan
+    #     path: ./plan.tfout
 
     - name: tf-test
       run: terraform test
