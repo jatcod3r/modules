@@ -7,6 +7,13 @@ mock_provider "aws" {
             default    = true
         }
     }
+    mock_data "aws_ec2_host" {
+        defaults = {
+            id         = "h-0385a99d0e4b20cbb"
+            arn        = "arn:aws:ec2:us-east-1:123456789012:host/h-0385a99d0e4b20cbb"\
+            instance_type = "mac2.metal"
+        }
+    }
 }
 
 run "create" {
