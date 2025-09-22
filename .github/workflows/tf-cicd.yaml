@@ -7,7 +7,7 @@ on:
         required: false
         type: string
         default: ${{ vars.APPROVERS }}
-      parent-job-name:
+      module-name:
         required: false
         type: string
         default: NO_JOB_NAME_PASSED
@@ -110,7 +110,7 @@ jobs:
         secret: ${{ github.Token }}
         approvers: ${{ inputs.approvers }}
         minimum-approvals: 1
-        issue-title: "Manual approval required to `tf apply` on `${{ inputs.parent-job-name }}`."
+        issue-title: "Manual approval required to `tf apply` on `${{ inputs.module-name }}`."
         issue-body: "Please approve/deny the deployment."
         exclude-workflow-inititator-as-approver: false
 
