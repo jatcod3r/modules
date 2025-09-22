@@ -87,6 +87,27 @@ jobs:
         directory: ${{ inputs.working-directory }}
         framework: terraform 
 
+    - name: tf-fmt
+      run: terraform fmt -recursive -no-color
+      continue-on-error: true
+
+    - name: create-pr
+      uses: peter-evans/create-pull-request@v5
+      # https://github.com/marketplace/actions/create-pull-request
+      with:
+        commit-message: terraform fmt
+        title: Format TF Files
+        body: Update tf files to canonical format using `terraform fmt`
+        branch: automated-terraform-fmt
+      
+    - name: automerge-pr
+      if: steps.create_pr.outputs.pull-request-operation == 'created'
+      # https://github.com/peter-evans/enable-pull-request-automerge
+      uses: peter-evans/enable-pull-request-automerge@v3
+      with:
+        pull-request-number: ${{ steps.create_pr.outputs.pull-request-number }}
+        merge-method: squash
+
     - name: tf-init
       run: terraform init
 
