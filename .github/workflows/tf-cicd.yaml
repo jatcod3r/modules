@@ -100,8 +100,7 @@ jobs:
         title: Format TF Files
         body: Update tf files to canonical format using `terraform fmt`
         branch: automated-terraform-fmt
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
       
     - name: automerge-pr
       if: steps.create_pr.outputs.pull-request-operation == 'created'
