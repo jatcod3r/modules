@@ -41,6 +41,17 @@ on:
         required: false
 
 jobs: 
+
+  tf-fmt:
+    uses: ./.github/workflows/tf-fmt.yaml
+    permissions:
+      id-token: write
+      issues: write
+      contents: read
+    with:
+      working-directory: ${{ inputs.working-directory }}
+    secrets: inherit
+
   tf-validate:
     runs-on: ubuntu-latest
     permissions:
