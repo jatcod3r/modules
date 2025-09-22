@@ -106,7 +106,7 @@ jobs:
         secret: ${{ github.Token }}
         approvers: ${{ inputs.approvers }}
         minimum-approvals: 1
-        issue-title: "Manual approval required to `tf apply` on `${{ inputs.working-directory }}`."
+        issue-title: "Manual approval required to `tf apply` on `${{ github.job }}`."
         issue-body: "Please approve/deny the deployment."
         exclude-workflow-inititator-as-approver: false
 
