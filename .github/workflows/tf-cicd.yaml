@@ -10,7 +10,7 @@ on:
       parent-job-name:
         required: false
         type: string
-        default: ${{ github.job }}
+        default: NO_JOB_NAME_PASSED
       working-directory:
         required: true
         type: string
