@@ -1,0 +1,62 @@
+name: TF Format
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
+      ENV_VARS:
+        type: string
+        required: false
+        default: ""
+
+jobs: 
+  tf-fmt:
+    runs-on: ubuntu-latest
+    if: github.actor == 'github-actions[bot]'
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: tf-setup
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.13.0
+
+    - name: add-custom-env
+      run: echo '${{ inputs.ENV_VARS }}' >> $GITHUB_ENV
+
+    - name: tf-init
+      run: terraform init
+
+    - name: tf-fmt
+      run: terraform fmt -recursive -no-color
+      continue-on-error: true
+
+    - name: create-pr
+      uses: peter-evans/create-pull-request@v7
+      # https://github.com/marketplace/actions/create-pull-request
+      with:
+        commit-message: terraform fmt
+        title: Format TF Files
+        body: Update tf files to canonical format using `terraform fmt`
+        branch: automated-terraform-fmt
+      
+    - name: automerge-pr
+      if: steps.create_pr.outputs.pull-request-operation == 'created'
+      # https://github.com/peter-evans/enable-pull-request-automerge
+      uses: peter-evans/enable-pull-request-automerge@v3
+      with:
+        pull-request-number: ${{ steps.create_pr.outputs.pull-request-number }}
+        merge-method: squash
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
