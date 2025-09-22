@@ -42,7 +42,7 @@ on:
 
 jobs: 
   tf-fmt:
-    uses: ./.github/workflows/tf-cicd.yaml
+    uses: ./.github/workflows/tf-fmt.yaml
     permissions:
       id-token: write
       issues: write
