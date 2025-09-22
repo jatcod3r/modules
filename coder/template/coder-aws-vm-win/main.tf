@@ -126,6 +126,16 @@ variable "instance_type" {
     default = "t3.large"
 }
 
+variable "ebs_optimized" {
+    type = bool
+    default = true
+}
+
+variable "instance_monitoring" {
+    type = bool
+    default = true
+}
+
 data "aws_region" "current" {}
 data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
@@ -209,6 +219,8 @@ resource "aws_instance" "this" {
     associate_public_ip_address = var.associate_public_ip_address
     vpc_security_group_ids      = var.vpc_security_group_ids
     iam_instance_profile        = var.instance_profile_name
+    ebs_optimized               = var.ebs_optimized   
+    monitoring                  = var.instance_monitoring
 
     user_data = <<-EOF
         <powershell>
@@ -230,6 +242,7 @@ resource "aws_instance" "this" {
 
     metadata_options {
         instance_metadata_tags = "enabled"
+        http_tokens = "required"
     }
 
     lifecycle {

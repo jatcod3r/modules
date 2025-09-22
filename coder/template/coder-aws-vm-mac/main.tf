@@ -131,6 +131,16 @@ variable "metadata_blocks" {
     default = []
 }
 
+variable "ebs_optimized" {
+    type = bool
+    default = true
+}
+
+variable "instance_monitoring" {
+    type = bool
+    default = true
+}
+
 data "aws_ec2_instance_type" "this" {
     instance_type = data.aws_ec2_host.this.instance_type
 }
@@ -237,7 +247,9 @@ resource "aws_instance" "this" {
     associate_public_ip_address = var.associate_public_ip_address
     vpc_security_group_ids      = var.vpc_security_group_ids
     iam_instance_profile        = var.instance_profile_name
-    tenancy = "host"
+    tenancy                     = "host"
+    ebs_optimized               = var.ebs_optimized   
+    monitoring                  = var.instance_monitoring
 
     user_data = join("\n", concat(
         var.pre_command == "" ? [] : [ var.pre_command ], 
@@ -253,6 +265,7 @@ resource "aws_instance" "this" {
 
     metadata_options {
         instance_metadata_tags = "enabled"
+        http_tokens = "required"
     }
 
     lifecycle {
