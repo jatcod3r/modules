@@ -92,7 +92,7 @@ jobs:
       continue-on-error: true
 
     - name: create-pr
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v7
       # https://github.com/marketplace/actions/create-pull-request
       with:
         commit-message: terraform fmt
