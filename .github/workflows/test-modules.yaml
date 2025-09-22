@@ -1,4 +1,4 @@
-name: Call a Re-Useable Workflow
+name: Test Modules
 
 on: push
   # pull_request:

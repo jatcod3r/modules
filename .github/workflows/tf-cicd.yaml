@@ -48,8 +48,12 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+
+    - name: python-setup
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
 
     - name: add-custom-env
       run: echo '${{ inputs.ENV_VARS }}' >> $GITHUB_ENV
@@ -73,17 +77,14 @@ jobs:
       with:
         terraform_version: 1.13.0
     
+    - name: checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: ${{ inputs.working-directory }}
+        framework: terraform 
+
     - name: tf-init
       run: terraform init
-
-    # - name: tf-plan
-    #   run: terraform plan -out=plan.tfout
-    
-    # - name: store-plan
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: tf-plan
-    #     path: ./plan.tfout
 
     - name: tf-test
       run: terraform test
