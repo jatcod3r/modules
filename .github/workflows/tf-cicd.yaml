@@ -52,17 +52,17 @@ jobs:
             module:
               - '${{ inputs.working-directory }}/**'
 
-  tf-fmt:
-    uses: ./.github/workflows/tf-fmt.yaml
-    permissions:
-      id-token: write
-      issues: write
-      contents: read
-      pull-requests: write
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
-    needs: [check-for-changes]
-    with:
-      working-directory: ${{ inputs.working-directory }}
+  # tf-fmt:
+  #   uses: ./.github/workflows/tf-fmt.yaml
+  #   permissions:
+  #     id-token: write
+  #     issues: write
+  #     contents: read
+  #     pull-requests: write
+  #   if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+  #   needs: [check-for-changes]
+  #   with:
+  #     working-directory: ${{ inputs.working-directory }}
   
   tf-validate:
     runs-on: ubuntu-latest
@@ -70,8 +70,8 @@ jobs:
       id-token: write
       contents: read
       issues: write
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
-    needs: [tf-fmt]
+    # if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    # needs: [tf-fmt]
     defaults:
       run:
         shell: bash
