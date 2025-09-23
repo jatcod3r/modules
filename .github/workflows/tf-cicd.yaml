@@ -51,6 +51,7 @@ jobs:
           filters: |
             module:
               - '${{ inputs.working-directory }}/**'
+      - runs: echo "Module changed: ${{ steps.changes.outputs.module }}"
     outputs:
       is-changed: steps.changes.outputs.module
 
