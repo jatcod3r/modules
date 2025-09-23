@@ -71,7 +71,6 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
-      push: write
     # if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
     # needs: [tf-fmt]
     defaults:
