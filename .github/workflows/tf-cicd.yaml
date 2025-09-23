@@ -39,14 +39,19 @@ on:
         required: false
       S3_REGION:
         required: false
-  push:
-    paths:
-      - ${{ inputs.working-directory }}
-  pull_request:
-    paths:
-      - ${{ inputs.working-directory }}
 
 jobs: 
+  check-for-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            module:
+              - '${{ inputs.working-directory }}/**'
+
   tf-fmt:
     uses: ./.github/workflows/tf-fmt.yaml
     permissions:
@@ -54,6 +59,8 @@ jobs:
       issues: write
       contents: read
       pull-requests: write
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: [check-for-changes]
     with:
       working-directory: ${{ inputs.working-directory }}
   
@@ -63,6 +70,8 @@ jobs:
       id-token: write
       contents: read
       issues: write
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: [tf-fmt]
     defaults:
       run:
         shell: bash
