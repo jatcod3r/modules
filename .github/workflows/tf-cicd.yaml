@@ -39,6 +39,12 @@ on:
         required: false
       S3_REGION:
         required: false
+  push:
+    paths:
+      - ${{ inputs.working-directory }}
+  pull_request:
+    paths:
+      - ${{ inputs.working-directory }}
 
 jobs: 
   tf-fmt:
