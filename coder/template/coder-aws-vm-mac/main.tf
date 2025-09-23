@@ -248,7 +248,7 @@ resource "aws_instance" "this" {
     vpc_security_group_ids      = var.vpc_security_group_ids
     iam_instance_profile        = var.instance_profile_name
     tenancy                     = "host"
-    ebs_optimized               = var.ebs_optimized   
+    ebs_optimized               = var.ebs_optimized
     monitoring                  = var.instance_monitoring
 
     user_data = join("\n", concat(

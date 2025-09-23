@@ -47,6 +47,7 @@ jobs:
       id-token: write
       issues: write
       contents: read
+      pull-request: write
     with:
       working-directory: ${{ inputs.working-directory }}
   

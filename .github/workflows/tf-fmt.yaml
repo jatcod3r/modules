@@ -18,6 +18,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-request: write
       issues: write
     defaults:
       run:
