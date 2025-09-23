@@ -195,6 +195,7 @@ data "aws_ami" "this" {
     }
 }
 
+
 resource "coder_agent" "ec2-agent" {
     arch = var.architecture
     os = "linux"
