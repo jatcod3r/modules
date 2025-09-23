@@ -12,6 +12,7 @@ jobs:
       id-token: write
       issues: write
       contents: read
+      pull-requests: write
     with:
       working-directory: ./coder/template/coder-aws-vm-linux
       module-name: coder-aws-vm-linux
@@ -22,6 +23,7 @@ jobs:
       id-token: write
       issues: write
       contents: read
+      pull-requests: write
     with:
       working-directory: ./coder/template/coder-aws-vm-mac
       module-name: coder-aws-vm-mac
@@ -34,6 +36,7 @@ jobs:
       id-token: write
       issues: write
       contents: read
+      pull-requests: write
     with:
       working-directory: ./coder/template/coder-aws-vm-win
       module-name: coder-aws-vm-win
