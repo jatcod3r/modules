@@ -106,13 +106,12 @@ jobs:
   tf-validate:
     runs-on: ubuntu-latest
     needs: tf-enforce-fmt
+    if: success() #  ${{ always() && contains(join(needs.*.result, ','), 'success') }}
     permissions:
       id-token: write
       contents: read
       issues: write
       pull-requests: write
-    needs: [tf-fmt]
-    if: success() #  ${{ always() && contains(join(needs.*.result, ','), 'success') }}
     defaults:
       run:
         shell: bash
