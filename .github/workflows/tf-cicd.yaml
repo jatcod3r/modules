@@ -61,7 +61,7 @@ jobs:
   tf-enforce-fmt:
     runs-on: ubuntu-latest
     needs: check-for-changes
-    if: needs.check-for-changes.outputs.is-changed == true
+    if: needs.check-for-changes.outputs.is-changed == 'true'
     permissions:
       id-token: write
       contents: write
