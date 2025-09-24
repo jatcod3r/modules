@@ -1,161 +1,161 @@
 terraform {
-    required_providers {
-        aws = {
-            source = "hashicorp/aws"
-        }
-        coder = {
-            source = "coder/coder"
-        }
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
     }
+    coder = {
+      source = "coder/coder"
+    }
+  }
 }
 
 variable "show_builtin_vscode" {
-    type = bool
-    default = false
+  type    = bool
+  default = false
 }
 
 variable "show_builtin_vscode_insiders" {
-    type = bool
-    default = false
+  type    = bool
+  default = false
 }
 
 variable "show_builtin_web_terminal" {
-    type = bool
-    default = true
+  type    = bool
+  default = true
 }
 
 variable "show_builtin_ssh_helper" {
-    type = bool
-    default = false
+  type    = bool
+  default = false
 }
 
 variable "memory_monitoring" {
-    type = object({
-        threshold = optional(number, 80)
-    })
-    default = {}
+  type = object({
+    threshold = optional(number, 80)
+  })
+  default = {}
 }
 
 variable "volume_monitoring" {
-    type = object({
-        threshold = optional(number, 80)
-        path = optional(string, "")
-    })
-    default = {}
+  type = object({
+    threshold = optional(number, 80)
+    path      = optional(string, "")
+  })
+  default = {}
 }
 
 variable "home_mount_path" {
-    type = string
-    default = "/Users/ec2-user"
+  type    = string
+  default = "/Users/ec2-user"
 }
 
 variable "subnet_id" {
-    type = string
-    default = ""
+  type    = string
+  default = ""
 }
 
 variable "vpc_security_group_ids" {
-    type = list(string)
-    default = []
+  type    = list(string)
+  default = []
 }
 
 variable "associate_public_ip_address" {
-    type = bool
-    default = false
+  type    = bool
+  default = false
 }
 
 variable "ami_id" {
-    type = string
-    default = ""
+  type    = string
+  default = ""
 }
 
 variable "pre_command" {
-    type = string
-    default = ""
+  type    = string
+  default = ""
 }
 
 variable "post_command" {
-    type = string
-    default = ""
+  type    = string
+  default = ""
 }
 
 variable "volume_size" {
-    type = number
-    default = 20
+  type    = number
+  default = 20
 }
 
 variable "coder_envs" {
-    type = map(string)
-    default = {}
+  type    = map(string)
+  default = {}
 }
 
 variable "tags" {
-    type = map(string)
-    default = {}
+  type    = map(string)
+  default = {}
 }
 
 variable "instance_profile_name" {
-    type = string
-    default = null
+  type    = string
+  default = null
 }
 
 variable "az_id" {
-    type = string
-    default = "a"
+  type    = string
+  default = "a"
 
-    validation {
-        condition = contains(["a", "b", "c", "d", "e"], var.az_id)
-        error_message = "'az_id' invalid. Must be either 'a', 'b', 'c', 'd'."
-    }   
+  validation {
+    condition     = contains(["a", "b", "c", "d", "e"], var.az_id)
+    error_message = "'az_id' invalid. Must be either 'a', 'b', 'c', 'd'."
+  }
 }
 
 variable "ec2_host_id" {
-    type = string
-    default = ""
+  type    = string
+  default = ""
 }
 
 variable "ec2_user_password" {
-    type = string
-    sensitive = true
+  type      = string
+  sensitive = true
 }
 
 variable "metadata_blocks" {
-    type = list(object({
-        display_name = string
-        key = string
-        order = optional(number, 1)
-        script = string
-        interval = optional(number, 10)
-        timeout = optional(number, 1)
-    }))
-    default = []
+  type = list(object({
+    display_name = string
+    key          = string
+    order        = optional(number, 1)
+    script       = string
+    interval     = optional(number, 10)
+    timeout      = optional(number, 1)
+  }))
+  default = []
 }
 
 variable "ebs_optimized" {
-    type = bool
-    default = true
+  type    = bool
+  default = true
 }
 
 variable "instance_monitoring" {
-    type = bool
-    default = true
+  type    = bool
+  default = true
 }
 
 data "aws_ec2_instance_type" "this" {
-    instance_type = data.aws_ec2_host.this.instance_type
+  instance_type = data.aws_ec2_host.this.instance_type
 }
 
 data "aws_ami" "this" {
-    most_recent      = true
-    owners           = ["amazon"]
-    filter {
-        name   = "name"
-        values = ["amzn-ec2-macos-*"]
-    }
-    filter {
-        name   = "architecture"
-        values = data.aws_ec2_instance_type.this.supported_architectures
-    }
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["amzn-ec2-macos-*"]
+  }
+  filter {
+    name   = "architecture"
+    values = data.aws_ec2_instance_type.this.supported_architectures
+  }
 }
 
 data "aws_region" "current" {}
@@ -163,68 +163,68 @@ data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
 
 locals {
-    volume_monitoring = try(var.volume_monitoring.path, false) == "" ? {
-        threshold = var.volume_monitoring.threshold
-        path = var.home_mount_path
-    } : var.volume_monitoring
-    ami_id = var.ami_id != "" ? var.ami_id : data.aws_ami.this.id
-    availability_zone = "${data.aws_region.current.region}${var.az_id}"
-    coder_envs = merge({
-        USER_PASSWORD = var.ec2_user_password
-    }, var.coder_envs)
+  volume_monitoring = try(var.volume_monitoring.path, false) == "" ? {
+    threshold = var.volume_monitoring.threshold
+    path      = var.home_mount_path
+  } : var.volume_monitoring
+  ami_id            = var.ami_id != "" ? var.ami_id : data.aws_ami.this.id
+  availability_zone = "${data.aws_region.current.region}${var.az_id}"
+  coder_envs = merge({
+    USER_PASSWORD = var.ec2_user_password
+  }, var.coder_envs)
 }
 
 resource "coder_agent" "ec2-agent" {
-    arch = trimsuffix(data.aws_ec2_instance_type.this.supported_architectures[0], "_mac")
-    os = "darwin"
-    auth = "aws-instance-identity"
-    env = var.coder_envs
-    display_apps {
-        vscode          = var.show_builtin_vscode
-        vscode_insiders = var.show_builtin_vscode_insiders
-        web_terminal    = var.show_builtin_web_terminal
-        ssh_helper      = var.show_builtin_ssh_helper
+  arch = trimsuffix(data.aws_ec2_instance_type.this.supported_architectures[0], "_mac")
+  os   = "darwin"
+  auth = "aws-instance-identity"
+  env  = var.coder_envs
+  display_apps {
+    vscode          = var.show_builtin_vscode
+    vscode_insiders = var.show_builtin_vscode_insiders
+    web_terminal    = var.show_builtin_web_terminal
+    ssh_helper      = var.show_builtin_ssh_helper
+  }
+  dynamic "metadata" {
+    for_each = var.metadata_blocks
+    content {
+      display_name = metadata.value.display_name
+      key          = metadata.value.key
+      order        = metadata.value.order
+      script       = metadata.value.script
+      interval     = metadata.value.interval
+      timeout      = metadata.value.timeout
     }
-    dynamic "metadata" {
-        for_each = var.metadata_blocks
+  }
+  dynamic "resources_monitoring" {
+    for_each = var.volume_monitoring != {} || var.memory_monitoring != {} ? [1] : []
+    content {
+      dynamic "memory" {
+        for_each = var.memory_monitoring != {} ? [1] : []
         content {
-            display_name = metadata.value.display_name
-            key = metadata.value.key
-            order = metadata.value.order
-            script = metadata.value.script
-            interval = metadata.value.interval
-            timeout = metadata.value.timeout
+          enabled   = true
+          threshold = var.memory_monitoring.threshold
         }
-    }
-    dynamic "resources_monitoring" {
-        for_each = var.volume_monitoring != {} || var.memory_monitoring != {} ? [1] : []
+      }
+      dynamic "volume" {
+        for_each = var.volume_monitoring != {} ? [1] : []
         content {
-            dynamic "memory" {
-                for_each = var.memory_monitoring != {} ? [1] : []
-                content {
-                    enabled = true
-                    threshold = var.memory_monitoring.threshold
-                }
-            }
-            dynamic "volume" {
-                for_each = var.volume_monitoring != {} ? [1] : []
-                content {
-                    enabled = true
-                    threshold = local.volume_monitoring.threshold
-                    path = local.volume_monitoring.path
-                }
-            }
+          enabled   = true
+          threshold = local.volume_monitoring.threshold
+          path      = local.volume_monitoring.path
         }
+      }
     }
+  }
 }
 
 resource "coder_script" "open_mac" {
-    agent_id     = coder_agent.ec2-agent.id
-    display_name = "Open Mac"
-    icon         = "/icon/apple-black.svg"
-    run_on_start = true
-    start_blocks_login = true
-    script = <<-EOF
+  agent_id           = coder_agent.ec2-agent.id
+  display_name       = "Open Mac"
+  icon               = "/icon/apple-black.svg"
+  run_on_start       = true
+  start_blocks_login = true
+  script             = <<-EOF
         #!/usr/bin/env sh
         dscl . -passwd /Users/ec2-user "$USER_PASSWORD"
         sudo -u 'ec2-user' sh -c '
@@ -235,68 +235,68 @@ resource "coder_script" "open_mac" {
 }
 
 data "aws_ec2_host" "this" {
-    host_id = var.ec2_host_id
+  host_id = var.ec2_host_id
 }
 
 resource "aws_instance" "this" {
-    ami                         = local.ami_id
-    instance_type               = data.aws_ec2_host.this.instance_type
-    subnet_id                   = var.subnet_id
-    availability_zone           = var.subnet_id != "" ? null : data.aws_ec2_host.this.availability_zone
-    host_id                     = data.aws_ec2_host.this.host_id
-    associate_public_ip_address = var.associate_public_ip_address
-    vpc_security_group_ids      = var.vpc_security_group_ids
-    iam_instance_profile        = var.instance_profile_name
-    tenancy                     = "host"
-    ebs_optimized               = var.ebs_optimized
-    monitoring                  = var.instance_monitoring
+  ami                         = local.ami_id
+  instance_type               = data.aws_ec2_host.this.instance_type
+  subnet_id                   = var.subnet_id
+  availability_zone           = var.subnet_id != "" ? null : data.aws_ec2_host.this.availability_zone
+  host_id                     = data.aws_ec2_host.this.host_id
+  associate_public_ip_address = var.associate_public_ip_address
+  vpc_security_group_ids      = var.vpc_security_group_ids
+  iam_instance_profile        = var.instance_profile_name
+  tenancy                     = "host"
+  ebs_optimized               = var.ebs_optimized
+  monitoring                  = var.instance_monitoring
 
-    user_data = join("\n", concat(
-        var.pre_command == "" ? [] : [ var.pre_command ], 
-        [ coder_agent.ec2-agent.init_script ], 
-        var.post_command == "" ? [] : [ var.post_command ]
-    ))
+  user_data = join("\n", concat(
+    var.pre_command == "" ? [] : [var.pre_command],
+    [coder_agent.ec2-agent.init_script],
+    var.post_command == "" ? [] : [var.post_command]
+  ))
 
-    root_block_device {
-        volume_size = var.volume_size
-        volume_type = "gp3"
-        delete_on_termination = true
-    }
+  root_block_device {
+    volume_size           = var.volume_size
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
 
-    metadata_options {
-        instance_metadata_tags = "enabled"
-        http_tokens = "required"
-    }
+  metadata_options {
+    instance_metadata_tags = "enabled"
+    http_tokens            = "required"
+  }
 
-    lifecycle {
-        ignore_changes = [ ami ]
-    }
+  lifecycle {
+    ignore_changes = [ami]
+  }
 
-    timeouts {
-        create = "90m"
-    }
+  timeouts {
+    create = "90m"
+  }
 
-    tags = var.tags
+  tags = var.tags
 }
 
 resource "coder_agent_instance" "this" {
-    agent_id    = coder_agent.ec2-agent.id
-    instance_id = aws_instance.this.id
+  agent_id    = coder_agent.ec2-agent.id
+  instance_id = aws_instance.this.id
 }
 
 resource "aws_ec2_instance_state" "this" {
-    instance_id = aws_instance.this.id
-    state       = data.coder_workspace.me.start_count != 0 ? "running" : "stopped"
+  instance_id = aws_instance.this.id
+  state       = data.coder_workspace.me.start_count != 0 ? "running" : "stopped"
 }
 
 output "id" {
-    value = aws_instance.this.id
+  value = aws_instance.this.id
 }
 
 output "arn" {
-    value = aws_instance.this.arn
+  value = aws_instance.this.arn
 }
 
 output "agent_id" {
-    value = coder_agent.ec2-agent.id
+  value = coder_agent.ec2-agent.id
 }
