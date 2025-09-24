@@ -91,7 +91,7 @@ jobs:
         echo "pull-request-operation: ${{ steps.create-pr.outputs.pull-request-operation }}"
       
     - name: automerge-pr
-      if: contains(["updated", "created"], steps.create-pr.outputs.pull-request-operation)
+      if: contains(fromJson('["updated","created"]'), steps.create-pr.outputs.pull-request-operation)
       # https://github.com/peter-evans/enable-pull-request-automerge
       uses: peter-evans/enable-pull-request-automerge@v3
       with:
