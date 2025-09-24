@@ -53,7 +53,7 @@ jobs:
               - '${{ inputs.working-directory }}/**'
       - id: validate-change
         run: |
-          echo "Module changed: ${{ steps.changes.outputs.module }}""
+          echo "Module changed: ${{ steps.changes.outputs.module }}"
     outputs:
       is-changed: steps.changes.outputs.module
 
