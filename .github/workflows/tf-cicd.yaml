@@ -85,10 +85,8 @@ jobs:
         terraform_version: ${{ inputs.tf-version }}
 
     - name: tf-fmt
-      run: terraform fmt -recursive -no-color -check
-
-    - name: tf-fmt-result
-      if: failure()
+      run: |
+        terraform fmt -recursive -no-color -check
 
     # - name: create-pr
     #   id: create-pr

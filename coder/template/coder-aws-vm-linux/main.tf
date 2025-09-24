@@ -180,6 +180,8 @@ locals {
 
 
 
+
+
 data "aws_ami" "this" {
     most_recent      = true
     owners           = ["amazon"]
