@@ -1,13 +1,13 @@
 variable "agent_id" {
-    type = string
+  type = string
 }
 
 variable "port" {
-    type = number
-    default = 13337
+  type    = number
+  default = 13337
 }
 
 variable "folder" {
-    type = string
-    default = "/home/coder"
+  type    = string
+  default = "/home/coder"
 }

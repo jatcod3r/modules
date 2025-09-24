@@ -1,7 +1,7 @@
 output "region" {
-    value = ""
+  value = ""
 }
 
 output "subnet" {
-    value = ""
+  value = ""
 }

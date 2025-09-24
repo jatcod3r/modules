@@ -3,7 +3,7 @@ data "coder_parameter" "vpc_id" {
   display_name = "VPC ID"
   description  = "The VPC to deploy the workspace in."
   mutable      = true
-  default = ""
+  default      = ""
 }
 
 data "coder_parameter" "subnet_id" {
@@ -11,5 +11,5 @@ data "coder_parameter" "subnet_id" {
   display_name = "Subnet ID"
   description  = "The subnet to deploy the workspace in."
   mutable      = true
-  default = ""
+  default      = ""
 }
