@@ -1,0 +1,146 @@
+name: TF CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      tf-version:
+        required: false
+        type: string
+        default: 1.13.0
+      python-version:
+        required: false
+        type: string
+        default: "3.12"
+      approvers:
+        required: false
+        type: string
+        default: ${{ vars.APPROVERS }}
+      module-name:
+        required: false
+        type: string
+        default: NO_JOB_NAME_PASSED
+      working-directory:
+        required: true
+        type: string
+      default-audience:
+        type: string
+        default: sts.amazonaws.com
+        required: false
+      s3-profile-name:
+        type: string
+        required: false
+        default: demo-profile
+      s3-profile-web-token-path:
+        type: string
+        default: /tmp/web_identity_token_file
+        required: false
+      ENV_VARS:
+        type: string
+        required: false
+        default: ""
+    secrets: 
+      DEFAULT_ROLE:
+        required: false
+      DEFAULT_REGION:
+        required: false
+      S3_ROLE:
+        required: false
+      S3_REGION:
+        required: false
+
+jobs: 
+  check-for-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            module:
+              - '${{ inputs.working-directory }}/**'
+    outputs:
+      is-changed: ${{ steps.changes.outputs.module }}
+
+  tf-enforce-fmt:
+    runs-on: ubuntu-latest
+    needs: check-for-changes
+    if: needs.check-for-changes.outputs.is-changed == 'true'
+    permissions:
+      id-token: write
+      contents: write
+      issues: write
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: tf-setup
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ inputs.tf-version }}
+
+    - name: tf-fmt
+      run: |
+        terraform fmt -recursive -no-color -check
+  
+  tf-validate:
+    runs-on: ubuntu-latest
+    needs: tf-enforce-fmt
+    if: success()
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: python-setup
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: add-custom-env
+      run: echo '${{ inputs.ENV_VARS }}' >> $GITHUB_ENV
+
+    - name: setup-default
+      uses: aws-actions/configure-aws-credentials@v5.0.0
+      with:
+        audience: ${{ inputs.default-audience }}
+        aws-region: ${{ secrets.DEFAULT_REGION }}
+        role-to-assume: ${{ secrets.DEFAULT_ROLE }}
+
+    - name: setup-s3-profile
+      run: |
+          aws configure set region ${{ secrets.S3_REGION }} --profile ${{ inputs.s3-profile-name }}
+          aws configure set role_arn ${{ secrets.S3_ROLE }} --profile ${{ inputs.s3-profile-name }}
+          curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r '.value' > ${{ inputs.s3-profile-web-token-path }}
+          aws configure set web_identity_token_file "${{ inputs.s3-profile-web-token-path }}" --profile ${{ inputs.s3-profile-name }}
+
+    - name: tf-setup
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ inputs.tf-version }}
+    
+    - name: checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: ${{ inputs.working-directory }}
+        framework: terraform 
+
+    - name: tf-init
+      run: terraform init
+
+    - name: tf-test
+      run: terraform test
+
