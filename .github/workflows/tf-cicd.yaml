@@ -56,7 +56,7 @@ jobs:
           echo "Directory monitored: ${{ inputs.working-directory }}/**"
           echo "Module changed?: ${{ steps.changes.outputs.module }}"
     outputs:
-      is-changed: steps.changes.outputs.module
+      is-changed: ${{ steps.changes.outputs.module }}
 
   tf-enforce-fmt:
     runs-on: ubuntu-latest
