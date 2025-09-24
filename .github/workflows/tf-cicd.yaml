@@ -89,7 +89,8 @@ jobs:
       id: approve-pr
       if: contains(fromJson('["updated","created"]'), steps.create-pr.outputs.pull-request-operation)
       run: |
-        gh pr review --comment -b "Auto-approved by github-action[bot]. Reason: formatting." --approve "${{ steps.create-pr.outputs.pull-request-number }}"
+        gh pr review --comment -b "Auto-approved by github-action[bot]. Reason: formatting." "${{ steps.create-pr.outputs.pull-request-number }}"
+        gh pr review --approve "${{ steps.create-pr.outputs.pull-request-number }}"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
