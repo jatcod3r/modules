@@ -223,6 +223,11 @@ variable "show_builtin_ssh_helper" {
     default = false
 }
 
+variable "coder_agent_startup_script" {
+    type = string
+    default = ""
+}
+
 variable "memory_monitoring" {
     type = object({
         threshold = optional(number, 80)
@@ -255,6 +260,7 @@ data "coder_workspace" "me" {}
 resource "coder_agent" "pod-agent" {
     arch = var.container_architecture
     os = var.container_os
+    startup_script = var.coder_agent_startup_script
 
     display_apps {
         vscode          = var.show_builtin_vscode
