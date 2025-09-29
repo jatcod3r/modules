@@ -146,7 +146,7 @@ variable "fs_gid" {
     default = 1000
 }
 
-variable "run_as_root" {
+variable "allow_privilege_escalation" {
     type = bool
     default = false
 }
@@ -455,7 +455,7 @@ resource "kubernetes_deployment" "this" {
                     command           = local.command
                     security_context {
                         run_as_user = "${var.user_id}"
-                        allow_privilege_escalation = var.run_as_root
+                        allow_privilege_escalation = var.allow_privilege_escalation
                         privileged = var.privileged
                         read_only_root_filesystem = var.read_only_root_filesystem
                     }
