@@ -151,6 +151,16 @@ variable "run_as_root" {
     default = false
 }
 
+variable "read_only_root_filesystem" {
+    type = bool
+    default = false
+}
+
+variable "privileged" {
+    type = bool
+    default = false
+}
+
 variable "deployment_strategy" {
     type = string
     default = "Recreate"
@@ -440,8 +450,8 @@ resource "kubernetes_deployment" "this" {
                     security_context {
                         run_as_user = "${var.user_id}"
                         allow_privilege_escalation = var.run_as_root
-                        privileged = false
-                        read_only_root_filesystem = false
+                        privileged = var.privileged
+                        read_only_root_filesystem = var.read_only_root_filesystem
                     }
                     resources {
                         limits = {

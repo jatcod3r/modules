@@ -1,6 +1,7 @@
 **/.terraform
 **/.terraform.lock.hcl
 **/terraform.tfstate
+**/terraform.tfstate.*
 
 .cache_ggshield
 *.tfvars*
