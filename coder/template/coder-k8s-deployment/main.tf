@@ -161,6 +161,11 @@ variable "privileged" {
   default = false
 }
 
+variable "service_account_name" {
+  type    = string
+  default = ""
+}
+
 variable "deployment_strategy" {
   type    = string
   default = "Recreate"
@@ -370,6 +375,7 @@ resource "kubernetes_deployment" "this" {
       spec {
         node_selector                    = var.node_selector
         termination_grace_period_seconds = var.termination_grace_period_seconds
+        service_account_name             = var.service_account_name
 
         dynamic "toleration" {
           for_each = var.tolerations
