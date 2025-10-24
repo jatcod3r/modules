@@ -136,6 +136,12 @@ variable "memory" {
   default     = 1
 }
 
+variable "ephemeral_storage" {
+  type        = number
+  description = "Ephemeral storage in GB."
+  default     = 10
+}
+
 variable "user_id" {
   type    = number
   default = 1000
@@ -475,6 +481,7 @@ resource "kubernetes_deployment" "this" {
             limits = {
               cpu    = "${var.cpu}m"
               memory = "${var.memory}Gi"
+              ephemeral-storage = "${var.ephemeral_storage}Gi"
             }
           }
           dynamic "env" {
